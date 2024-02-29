@@ -15,7 +15,10 @@ class Trainer:
         self.config = config
 
     def train(self):
-        wandb.login()
+        wandb_config = self.config.get_wandb_config()
+        wandb.login(
+            key=wandb_config.key
+        )
         run = wandb.init(
             # Set the project where this run will be logged
             project="Vi_news_chatbot",
@@ -39,7 +42,7 @@ class Trainer:
                 x['text_len'] <= 896
             )
         )
-        clean_ds = filter_ds.map(clean_text)
+        clean_ds = filter_ds.map(clean_data_text)
         config = AutoConfig.from_pretrained(base_model)
         tokenizer = AutoTokenizer.from_pretrained(base_model)  
         model = T5ForConditionalGeneration.from_pretrained(base_model, config=config)

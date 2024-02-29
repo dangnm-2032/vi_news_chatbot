@@ -1,6 +1,6 @@
 from unstructured.cleaners.core import clean_extra_whitespace
 
-def clean_text(batch):
+def clean_data_text(batch):
     batch['text'] = batch['text'].replace("\n", ' ')
     batch['text'] = batch['text'].replace("\t", ' ')
     batch['text'] = batch['text'].replace("\r", ' ')

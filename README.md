@@ -1,46 +1,65 @@
-# vi_news_chatbot
+# Vietnamese News Summary Bot
 
-0. Choose encode model
-    a. Vietnamese dataset
-    b. Sentence similarity task
-    c. News dataset
-    -> bkai-foundation-models/vietnamese-bi-encoder
+## Introduction:
+Are you interested in something that happened recently but don't have time to read all the related articles to fully understand the situation? This open source project is for you!
+You just need to enter keywords about the event you want to learn about, the system will automatically search, filter and summarize for you.
+Below is the project demo.
+![Project Demo](https://github.com/dangnm-2032/vinewschatbot/blob/metadata/demo.png?raw=true)
 
-1. Crawl dataset
-    0. HF Datasets
-        - vietgpt/news_summarization_vi
-        - OpenHust/vietnamese-summarization
-        - nlplabtdtu/summarization_sft_prompted
-        - csebuetnlp/xlsum
-        - toanduc/t5-sumary-dataset
-        - bltlab/lr-sum
-    -> Done
-    a. VNExpress
-    b. Crawl format
-        {
-            'unix_timestamp': '',
-            'title': '',
-            'content': '',
-            'images': {
-                '0': {
-                    'caption': '',
-                    'img_path': ''
-                }
-            }
-        }
-2. Database
-    a. Tables: 
-        - News (id, title) 
-        - Passage (id, news_id, data)
-        - Chunk (id, passage_id, data, embedding)
+## Features:
+- Vietnamese News Summary Bot
+- Query news from VNE
+- Perform Silhoutte and Kmeans to filter most related news
+- Nvidia GPU accessibility
 
-3. Train summarize model
-    a. Dataset
-        - Query ~10 related news, concat them into one doc -> input
-        - Use LLM to summarize it -> label
-    b. Model
-        - NlpHUST/t5-small-vi-summarization
-        - VietAI/vit5-large-vietnews-summarization
-        - PhoGPT
-        - bkai-foundation-models/vietnamese-llama2-7b-120GB
+## How to use
+### Install Docker
+> Please follow the instruction of Docker: [Install Docker Engine](https://docs.docker.com/engine/install/)
+> 
+> **IMPORTANT FOR LINUX** Do Docker post installation for linux
+
+### Install Nvidia GPU driver
+```
+sudo add-apt-repository ppa:graphics-drivers/ppa  
+sudo apt update  
+sudo apt install ubuntu-drivers-common  
+sudo apt dist-upgrade  
+sudo reboot  
+sudo ubuntu-drivers autoinstall  
+sudo reboot
+```
+Test the installation, run:
+```
+nvidia-smi
+```
+
+### Installing Nvidia Container Toolkit
+```
+distribution=$(. /etc/os-release;echo  $ID$VERSION_ID)  
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -  
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt-get update
+sudo apt-get install -y nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+```
+
+### Install application
+```
+docker compose build
+```
+
+### Configurration
+> Please take a look in to config.yaml
+
+### Run
+```
+docker compose up
+```
+
+### Stop
+```
+docker compose down
+```
+
         

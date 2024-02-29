@@ -11,32 +11,32 @@ def main():
         config_filepath=CONFIG_FILE_PATH
     )
 
-    try:
-        STAGE_NAME = stage_name("STAGE 1: VALIDATE PROGRAM")
-        logger.info(STAGE_NAME)
-        validate_program = ValidateProgramPipeline(config=config_manager)
-        validate_program.main()
-    except Exception as e:
-        logger.exception(e)
-        raise e
+    # try:
+    #     STAGE_NAME = stage_name("STAGE 1: VALIDATE PROGRAM")
+    #     logger.info(STAGE_NAME)
+    #     validate_program = ValidateProgramPipeline(config=config_manager)
+    #     validate_program.main()
+    # except Exception as e:
+    #     logger.exception(e)
+    #     raise e
     
-    try:
-        STAGE_NAME = stage_name("STAGE 2: CREATE TRAINING DATASET")
-        logger.info(STAGE_NAME)
-        create_dataset = CreateDatasetPipeline(config=config_manager)
-        create_dataset.main()
-    except Exception as e:
-        logger.exception(e)
-        raise e
+    # try:
+    #     STAGE_NAME = stage_name("STAGE 2: CREATE TRAINING DATASET")
+    #     logger.info(STAGE_NAME)
+    #     create_dataset = CreateDatasetPipeline(config=config_manager)
+    #     create_dataset.main()
+    # except Exception as e:
+    #     logger.exception(e)
+    #     raise e
     
-    try:
-        STAGE_NAME = stage_name("STAGE 3: TRAIN SUMMARY MODEL")
-        logger.info(STAGE_NAME)
-        training = TrainingPipeline(config=config_manager)
-        training.main()
-    except Exception as e:
-        logger.exception(e)
-        raise e
+    # try:
+    #     STAGE_NAME = stage_name("STAGE 3: TRAIN SUMMARY MODEL")
+    #     logger.info(STAGE_NAME)
+    #     training = TrainingPipeline(config=config_manager)
+    #     training.main()
+    # except Exception as e:
+    #     logger.exception(e)
+    #     raise e
 
     try:
         STAGE_NAME = stage_name("STAGE 4: RUNNING INFERENCE")

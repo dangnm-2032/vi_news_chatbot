@@ -17,3 +17,6 @@ summary_model:
   
 summary_dataset:
   path: 'artifacts/summary_dataset'
+
+wandb:
+  key: 'c412e4c6eebb24766f8e3818fe61875f34a8f95c'

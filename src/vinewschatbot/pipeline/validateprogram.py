@@ -10,6 +10,7 @@ class ValidateProgramPipeline:
         self.validator = Validator(config=self.config)
 
     def main(self):
+        self.validator.wandb_config()
         self.validator.word_segmentor()
         self.validator.search_model()
         self.validator.dataset()

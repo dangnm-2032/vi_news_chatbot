@@ -12,6 +12,12 @@ class ConfigurationManager:
         self.config = read_yaml(config_filepath)
         self.params = read_yaml(params_filepath)
 
+    def get_wandb_config(self) -> Wandb:
+        config = self.config.wandb
+        return Wandb(
+            key=config.key
+        )
+
     def get_inference_server_config(self) -> Server:
         config = self.config.server
         return Server(

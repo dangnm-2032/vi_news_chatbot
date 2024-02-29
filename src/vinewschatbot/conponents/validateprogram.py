@@ -13,6 +13,15 @@ class Validator:
     ) -> None:
         self.config = config
 
+    def wandb_config(self):
+        logger.info("Checking wandb config...")
+        wand_config = self.config.get_wandb_config()
+        if wand_config.key == "your_wandb_api_key":
+            msg = "Enter your wandb api key in config/config.yaml\nPlease visit https://wandb.ai/settings to get your api."
+            logger.exception(msg)
+            raise msg
+        logger.info("Done")
+
     def word_segmentor(self):
         logger.info("Checking word segmentor...")
         config = self.config.get_word_segmentor_config()

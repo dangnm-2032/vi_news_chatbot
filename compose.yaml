@@ -10,15 +10,28 @@
 version: '3'
 
 services:
-  postgresql:
-    image: ankane/pgvector
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=1234
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - 6000:5432
+      - 7860:7860
     volumes:
-      - ./artifacts/database:/var/lib/postgresql/data
+      - ./config:/app/config
+      - ./src:/app/src 
+      - ./artifacts:/app/artifacts
+      - ./logs:/app/logs
+      - ./wandb:/app/wandb
+      - ./main.py:/app/main.py
+    stdin_open: true 
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to

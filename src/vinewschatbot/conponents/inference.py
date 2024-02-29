@@ -84,7 +84,7 @@ class Inference:
                     self.model
                 )
                 news_data.append(ret)
-            big_news = "\n".join([data['summary'] for data in news_data])
+            big_news = "\n\n".join([data['summary'] for data in news_data])
             # big_news_summary = summarize(big_news)
             ref_links = '\n\t'.join([data['link'] for data in news_data])
             ret_format = f"""{big_news}

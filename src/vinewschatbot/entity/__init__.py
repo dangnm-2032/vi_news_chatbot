@@ -53,3 +53,7 @@ class GenerationConfig:
 class Server:
     share: bool
     server_name: str
+
+@dataclass
+class Wandb:
+    key: str

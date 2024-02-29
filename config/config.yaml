@@ -1,0 +1,22 @@
+server:
+  share: True
+  server_name: "0.0.0.0"
+
+word_segmentor:
+  source: 'https://github.com/vncorenlp/VnCoreNLP.git'
+  model_name_or_path: 'artifacts/VnCoreNLP'
+
+search_model:
+  model_name_or_path: 'bkai-foundation-models/vietnamese-bi-encoder'
+  is_gpu: false
+
+summary_model:
+  base_model: 'VietAI/vit5-large-vietnews-summarization'
+  model_name_or_path: 'artifacts/new_summarizer_model'
+  is_gpu: true
+  
+summary_dataset:
+  path: 'artifacts/summary_dataset'
+
+wandb:
+  key: 'c412e4c6eebb24766f8e3818fe61875f34a8f95c'

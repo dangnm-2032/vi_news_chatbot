@@ -1,0 +1,24 @@
+TrainingArgs:
+  output_dir: 'artifacts/model_checkpoints'
+  evaluation_strategy: 'steps'
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 16
+  warmup_ratio: 0.02
+  eval_steps: 200
+  report_to: 'wandb'
+  logging_steps: 1
+  learning_rate: 0.00001443
+  lr_scheduler_type: 'linear'
+  max_steps: 3000
+GenerationConfig:
+  num_beams: 1
+  top_k: 6
+  top_p: 0.9
+  temperature: 0.6
+  max_length: 129
+  min_length: 41
+  num_return_sequences: 1
+  repetition_penalty: 1.1
+  do_sample: False
+  penalty_alpha: 0.6

@@ -1,0 +1,19 @@
+beautifulsoup4
+datasets
+ensure
+GitPython
+gradio
+numpy
+pandas
+py_vncorenlp
+python_box
+PyYAML
+Requests
+scikit_learn
+sentence_transformers
+setuptools
+transformers
+underthesea
+unstructured
+accelerate
+-e .

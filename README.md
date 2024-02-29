@@ -4,7 +4,7 @@
 Are you interested in something that happened recently but don't have time to read all the related articles to fully understand the situation? This open source project is for you!
 You just need to enter keywords about the event you want to learn about, the system will automatically search, filter and summarize for you.
 Below is the project demo.
-![Project Demo](https://github.com/dangnm-2032/vinewschatbot/blob/metadata/demo.png?raw=true)
+![Project Demo](https://github.com/dangnm-2032/vi_news_chatbot/blob/dev.dataset/metadata/demo.png)
 
 ## Features:
 - Vietnamese News Summary Bot

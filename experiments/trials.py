@@ -33,8 +33,11 @@ import torch
 import gradio as gr
 from underthesea import sent_tokenize
 import pandas as pd
+import numpy as np
 import wandb
 import gradio
+import re
+import string
 disable_caching()
 
 def crawl_post_link():
@@ -520,6 +523,83 @@ def insert_db():
     conn.close()
 
 def pipeline():
+    def search_post_link(query):
+        def clean_input(text):
+            text = text.translate(str.maketrans('', '', string.punctuation))
+            text = text.replace(" ", "+")
+            print(text)
+            return text
+        url = f'https://timkiem.vnexpress.net/?q={clean_input(query)}'
+        delay = 0
+        while True:
+            response = requests.get(url)
+            if response.ok:
+                break
+            time.sleep(0.5 + delay)
+            delay += 0.1
+            if 0.5 + delay > 1.0:
+                print("Time out")
+                raise Exception("Time out")
+        soup = BeautifulSoup(response.content, "html.parser")
+        titles = []
+        links = []
+        for article in soup.find_all("div", attrs="width_common list-news-subfolder")[0].find_all("article"):
+            if article.h3:
+                titles.append(article.h3.a.get('title'))
+                links.append(article.h3.a.get("href"))
+        return titles, links
+    def choose_most_related_news(titles):
+        from sklearn.cluster import KMeans
+        import numpy as np
+        from sklearn.metrics import silhouette_score
+        sentences = [" ".join(rdrsegmenter.word_segment(sent)) for sent in titles]
+        embeddings = search_model.encode(sentences)
+        silhouette_avg = []
+        for num_clusters in list(range(2,len(titles))):
+            kmeans = KMeans(n_clusters=num_clusters, init = "k-means++", n_init = 10)
+            kmeans.fit_predict(embeddings)
+            score = silhouette_score(embeddings, kmeans.labels_)
+            silhouette_avg.append(score)
+        best_k = np.argmax(silhouette_avg)+2
+        kmeans = KMeans(n_clusters=best_k, random_state=0, n_init="auto").fit(embeddings)
+        y_kmeans = kmeans.predict(embeddings)
+        _, counts = np.unique(y_kmeans, return_counts=True)
+        return np.where(y_kmeans == np.argmax(counts))
+    def crawl_content(url):    
+        delay = 0.0
+        ret = {}
+        try:
+            while True:
+                response = requests.get(url)
+                if response.ok:
+                    break
+                time.sleep(0.5 + delay)
+                delay += 0.1
+                if 0.5 + delay > 1.0:
+                    print("Time out")
+                    raise Exception("Time out")
+            soup = BeautifulSoup(response.content, "html.parser")
+            title = soup.title.text
+            article_0 = []
+            article_1 = []
+            for p in soup.find_all("body")[0].find_all("p"):
+                if p.text not in article_0 and not p.find("strong"):
+                    article_0.append(p.text)
+            for p in soup.find_all("p", "Normal"):
+                if p.text not in article_1 and not p.find("strong"):
+                    article_1.append(p.text)
+            article = article_0 if len(article_0) >= len(article_1) else article_1
+            content = " ".join(article)
+            ret['title'] = title
+            ret['content'] = content
+            ret['link'] = url
+        except Exception as e:
+            print(e)
+            ret['title'] = ""
+            ret['content'] = ""
+            ret['link'] = url
+        return ret 
+
     def execute(query):
         cursor.execute(query)
         conn.commit()
@@ -534,13 +614,13 @@ def pipeline():
     config = AutoConfig.from_pretrained(checkpoint)
     model = T5ForConditionalGeneration.from_pretrained(checkpoint, config=config)
     model.cuda()
-    conn = psycopg2.connect(
-        database="postgres", 
-        user="admin", 
-        password="1234", 
-        host="127.0.0.1", 
-        port="6000")
-    cursor = conn.cursor()
+    # conn = psycopg2.connect(
+    #     database="postgres", 
+    #     user="admin", 
+    #     password="1234", 
+    #     host="127.0.0.1", 
+    #     port="6000")
+    # cursor = conn.cursor()
     def clean_text(batch):
         batch = batch.replace("\n", ' ')
         batch = batch.replace("\t", ' ')
@@ -572,51 +652,61 @@ def pipeline():
         torch.cuda.empty_cache()
         return decoded_output.replace('. ', '.\n')
     def process(text):
-        text = " ".join(rdrsegmenter.word_segment(text))
-        text_e = [float(e) for e in search_model.encode(text)]
-        ret = execute(f"""
-            SELECT id, data, link
-            FROM news
-            WHERE id IN (
-                WITH news_search AS (
-                    SELECT id, data, embed
-                    FROM news
-                    ORDER BY embed <=> '{text_e}' 
-                ), sentence_search AS (
-                    SELECT news_id, data
-                    FROM sentence
-                    ORDER BY embed <=> '{text_e}' 
-                )
-                SELECT ns.id
-                FROM news_search ns, sentence_search ss
-                WHERE ns.id = ss.news_id
-                LIMIT 20
-            )
-            LIMIT 10;
-        """)
+        # text = " ".join(rdrsegmenter.word_segment(text))
+        # text_e = [float(e) for e in search_model.encode(text)]
+        # ret = execute(f"""
+        #     SELECT id, data, link
+        #     FROM news
+        #     WHERE id IN (
+        #         WITH news_search AS (
+        #             SELECT id, data, embed <=> '{text_e}' 
+        #             FROM news
+        #             ORDER BY embed <=> '{text_e}' 
+        #         ), sentence_search AS (
+        #             SELECT news_id, data
+        #             FROM sentence
+        #             ORDER BY embed <=> '{text_e}' 
+        #         )
+        #         SELECT ns.id
+        #         FROM news_search ns, sentence_search ss
+        #         WHERE ns.id = ss.news_id
+        #         LIMIT 20
+        #     )
+        #     LIMIT 10;
+        # """)
+        # news_data = []
+        # for result in ret.fetchall():
+        #     news_id, title, link = result
+        #     content = execute(f"""
+        #         SELECT data
+        #         FROM sentence
+        #         WHERE news_id = {news_id};
+        #     """).fetchall()
+        #     content = " ".join([sent[0] for sent in content])
+        #     summary = summarize(content)
+        #     news_data.append({
+        #         'title': title,
+        #         'content': content,
+        #         'summary': summary,
+        #         'link': link
+        #     })
+        titles, links = search_post_link(text)
+        idx = choose_most_related_news(titles)
+        links = np.array(links)
+        related_links = links[idx]
         news_data = []
-        for result in ret.fetchall():
-            news_id, title, link = result
-            content = execute(f"""
-                SELECT data
-                FROM sentence
-                WHERE news_id = {news_id};
-            """).fetchall()
-            content = " ".join([sent[0] for sent in content])
-            summary = summarize(content)
-            news_data.append({
-                'title': title,
-                'content': content,
-                'summary': summary,
-                'link': link
-            })
-        big_news = "\n\t".join([data['summary'] for data in news_data])
-        big_news_summary = summarize(big_news)
+        for i, link in enumerate(related_links):
+            print(i)
+            ret = crawl_content(link)
+            ret['summary'] = summarize(ret['content'])
+            news_data.append(ret)
+        big_news = "\n".join([data['summary'] for data in news_data])
+        # big_news_summary = summarize(big_news)
         ref_links = '\n\t'.join([data['link'] for data in news_data])
-        ret_format = f"""{big_news_summary}
+        ret_format = f"""{big_news}
 
 Nguồn:
-{ref_links}
+\t{ref_links}
 """
         return ret_format
     demo = gr.Interface(fn=process, inputs="textbox", outputs="textbox")
